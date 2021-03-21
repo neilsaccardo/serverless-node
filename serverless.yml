@@ -1,0 +1,35 @@
+service: app
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  apiKeys:
+    -  ${self:service.name}-${self:provider.stage}
+  timeout: 29
+package: # Optional deployment packaging configuration
+  include: # Specify the directories and files which should be included in the deployment package
+    - index.js
+  exclude:
+    yarn.lock
+
+functions:
+  usersCreate: 
+    handler: index.handler
+    memorySize: 512
+    events:
+      - http:
+          path: test
+          method: get
+          cors: true
+          private: true
+
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-offline
+custom:
+  prune:
+    automatic: true
+    number: 1
